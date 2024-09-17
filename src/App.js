@@ -48,7 +48,7 @@ function App() {
             content: `Generate a professional meeting agenda for the following topics:\n\n${topics}`,
           },
         ],
-        max_tokens: 150,
+        max_tokens: 300,  // Increased token limit
       }),
     });
 
@@ -56,8 +56,7 @@ function App() {
     if (data && data.choices && data.choices.length > 0) {
       return {
         subject: topics,
-        purpose: "AI in Supply Chain & Logistics", // Example, replace with real data
-        content: data.choices[0].message.content.trim(),
+        content: formatAgenda(data.choices[0].message.content.trim()), // Format agenda content
       };
     } else {
       return {
@@ -65,6 +64,16 @@ function App() {
         content: "Error generating agenda. Please try again.",
       };
     }
+  };
+
+  // Function to format the response with HTML elements
+  const formatAgenda = (content) => {
+    return content
+      .replace(/^•/gm, "<li>")  // Replace bullet points with <li>
+      .replace(/\n\n/g, "</li><br/><br/>") // Replace double newlines with paragraph breaks
+      .replace(/^(I|II|III|IV|V|VI|VII|VIII|IX|X)\./gm, "<strong>$&</strong>") // Bold headings with Roman numerals
+      .replace(/-\s[A-Z]+\./g, "<strong>$&</strong>") // Bold the sub-points
+      .replace(/\n/g, "</li><li>");  // Replace remaining single newlines with <li> for line breaks
   };
 
   return (
@@ -95,37 +104,8 @@ function App() {
         <div className="agenda">
           <h2>Generated Agenda:</h2>
           <div className="agenda-content">
-            <ul>
-              <li><strong>Meeting Agenda Subject:</strong> {agenda.subject}</li>
-              <li>
-                <strong>1. Opening:</strong>
-                <ul>
-                  <li>Call to Order</li>
-                  <li>Purpose of the Meeting: {agenda.purpose}</li>
-                </ul>
-              </li>
-              <li><strong>2. Welcome Note & Introduction</strong></li>
-              <li>
-                <strong>3. Updates & Old Business:</strong>
-                <ul>
-                  <li>Review and Approval of Previous Meeting Minutes</li>
-                  <li>Progress since Last Meeting</li>
-                  <li>Follow-ups & Outstanding tasks</li>
-                </ul>
-              </li>
-              <li>
-                <strong>4. Presentation:</strong>
-                <ul>
-                  <li><strong>AI in Supply Chain & Logistics</strong></li>
-                  <li>
-                    <ul style={{ listStyleType: "circle", marginLeft: "20px" }}>
-                      <li>Introduction to AI: What it is and its relevance in the modern world</li>
-                      <li>AI impact on Supply Chain and logistics (with case studies)</li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-            </ul>
+            <p><strong>Meeting Agenda Subject:</strong> {agenda.subject}</p>
+            <ul dangerouslySetInnerHTML={{ __html: agenda.content }} /> {/* Dynamically render formatted content */}
           </div>
         </div>
       )}
@@ -134,3 +114,4 @@ function App() {
 }
 
 export default App;
+
